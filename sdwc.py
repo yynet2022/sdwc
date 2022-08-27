@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import sys
+import time
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
@@ -376,7 +377,11 @@ class SimpleDigitalWallClock(tk.Frame):
         self.__cdate.itemconfig('cdate', text=s)
         s = '{0:0>2d}:{1:0>2d}:{2:0>2d}'.format(n.hour, n.minute, n.second)
         self.__ctime.itemconfig('ctime', text=s)
-        self.master.after(100, self.__show_time)
+
+        t = time.time()
+        tt = int((int(t)+1.05-t)*1000)
+        self.master.after(tt, self.__show_time)
+        # print(tt, n)
 
 
 def main():
