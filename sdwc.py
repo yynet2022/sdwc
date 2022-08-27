@@ -149,13 +149,14 @@ class wFontDialog(tkSimpleDialog.Dialog):
 
 
 class toggleButton(ttk.OptionMenu):
-    def __init__(self, parent, init_value, callback):
+    def __init__(self, parent, init_value, callback, **ka):
         self.__cb = callback
         self.__values = ('OFF', 'ON')
         v = self.__values[int(init_value)]
         self.__var = tk.StringVar()
         super().__init__(parent, self.__var, v, *self.__values,
                          command=self.__selected)
+        self.config(**ka)
 
     def __selected(self, v):
         self.__cb(bool(self.__values.index(v)))
@@ -166,21 +167,22 @@ class wMenu(tkSimpleDialog.Dialog):
         super().__init__(parent, title)
 
     def body(self, bfrm):
-        w = 12
+        w = -12
 
         r = 0
         lb = tk.Label(bfrm, text='Override-Redirect:')
         lb.grid(row=r, column=0)
 
         b = toggleButton(bfrm, config['OVERRIDEREDIRECT'],
-                         self.__selected_overrideredirect)
+                         self.__selected_overrideredirect, width=w)
         b.grid(row=r, column=1, padx=5, pady=5)
 
         r += 1
         lb = tk.Label(bfrm, text='Top-Most:')
         lb.grid(row=r, column=0, sticky=tk.W)
 
-        b = toggleButton(bfrm, config['TOPMOST'], self.__selected_topmost)
+        b = toggleButton(bfrm, config['TOPMOST'],
+                         self.__selected_topmost, width=w)
         b.grid(row=r, column=1, padx=5, pady=5)
 
         r += 1
@@ -203,7 +205,7 @@ class wMenu(tkSimpleDialog.Dialog):
         b['command'] = self.__setFont_time
         b.bind('<Return>', self.__setFont_time)
 
-        b = tk.Button(bfrm, text='Color', width=w, default=tk.ACTIVE)
+        b = tk.Button(bfrm, text='Color', width=w, state=tk.DISABLED)
         b.grid(row=r, column=2, padx=5, pady=5)
 
         return ret
