@@ -154,16 +154,15 @@ class wFontDialog(tkSimpleDialog.Dialog):
 
 class toggleButton(ttk.OptionMenu):
     def __init__(self, parent, init_value, callback, **ka):
-        self.__cb = callback
-        self.__values = ('OFF', 'ON')
-        v = self.__values[int(init_value)]
-        self.__var = tk.StringVar()
-        super().__init__(parent, self.__var, v, *self.__values,
-                         command=self.__selected)
-        self.config(**ka)
+        values = ('OFF', 'ON')
+        val = values[int(init_value)]
+        var = tk.StringVar()
 
-    def __selected(self, v):
-        self.__cb(bool(self.__values.index(v)))
+        def selected(v):
+            callback(bool(values.index(v)))
+
+        super().__init__(parent, var, val, *values, command=selected)
+        self.config(**ka)
 
 
 class wMenu(tkSimpleDialog.Dialog):
@@ -268,9 +267,6 @@ class wMenu(tkSimpleDialog.Dialog):
             self.parent.setTimeFont(f.result)
             config['TIME_FONT'] = f.result
             save_config()
-
-    def __quit(self, event=None):
-        self.parent.master.destroy()
 
 
 class SimpleDigitalWallClock(tk.Frame):
@@ -387,16 +383,17 @@ class SimpleDigitalWallClock(tk.Frame):
 class winTray(threading.Thread):
     def __init__(self, app, **ka):
         self.__app = app
+
+        def show_menu():
+            app.master.after(0, app.show_menu)
+
         menu = (
-            pystray.MenuItem('Menu', self.__show_menu),
+            pystray.MenuItem('Menu', show_menu),
             pystray.MenuItem('Quit', self.quit0))
         image = Image.new("RGB", (32, 32), (2, 255, 255))
         n = 'Simple Digital Wall Clock'
         self.__icon = pystray.Icon(n, image, n, menu)
         super().__init__(**ka)
-
-    def __show_menu(self):
-        self.__app.master.after(0, self.__app.show_menu)
 
     def quit0(self):
         self.__icon.stop()
