@@ -1,14 +1,18 @@
 # -*- coding:utf-8 -*-
 import sys
 import time
+from datetime import datetime
+import threading
+import json
+import traceback
+# from pprint import pprint
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 import tkinter.simpledialog as tkSimpleDialog
 import tkinter.messagebox as tkMessageBox
-from datetime import datetime
-import json
-# from pprint import pprint
+import pystray
+from PIL import Image
 
 CONFIGFILE = 'sdwc.in'
 SSSCALE = 1.01
@@ -218,12 +222,7 @@ class wMenu(tkSimpleDialog.Dialog):
         w.pack(side=tk.LEFT, padx=5, pady=5)
         w.bind('<Return>', self.cancel)
 
-        w = tk.Button(box, text="Exit", width=10, command=self.__quit)
-        w.pack(side=tk.LEFT, padx=5, pady=5)
-        w.bind('<Return>', self.__quit)
-
         self.bind('<Escape>', self.cancel)
-
         box.pack()
 
     def __selected_topmost(self, v):
@@ -312,7 +311,6 @@ class SimpleDigitalWallClock(tk.Frame):
         self.__ctime = c
 
         self.pack(padx=5, pady=5)
-        self.master.bind('<Button-1>', self.__show_menu)
         self.updateGeometry()
 
     def run(self):
@@ -370,7 +368,7 @@ class SimpleDigitalWallClock(tk.Frame):
         cd.itemconfig('ctime', font=fn)
         self.updateGeometry()
 
-    def __show_menu(self, e):
+    def show_menu(self):
         wMenu(self)
 
     def __show_time(self):
@@ -386,9 +384,32 @@ class SimpleDigitalWallClock(tk.Frame):
         # print(tt, n)
 
 
+class winTray(threading.Thread):
+    def __init__(self, app, **ka):
+        self.__app = app
+        menu = (
+            pystray.MenuItem('Menu', self.__show_menu),
+            pystray.MenuItem('Quit', self.quit0))
+        image = Image.new("RGB", (32, 32), (2, 255, 255))
+        n = 'Simple Digital Wall Clock'
+        self.__icon = pystray.Icon(n, image, n, menu)
+        super().__init__(**ka)
+
+    def __show_menu(self):
+        self.__app.master.after(0, self.__app.show_menu)
+
+    def quit0(self):
+        self.__icon.stop()
+
+    def run(self):
+        self.__icon.run()
+        self.__app.master.after(0, self.__app.master.destroy)
+
+
 def main():
     load_config()
     TP_COLOR = config['TRANSPARENTCOLOR']
+
     win = tk.Tk()
     win.config(bd=0, bg=TP_COLOR)
 
@@ -398,7 +419,19 @@ def main():
         win.wm_attributes('-transparentcolor', TP_COLOR)
         win.attributes('-topmost', config['TOPMOST'])
         win.overrideredirect(config['OVERRIDEREDIRECT'])
-    SimpleDigitalWallClock(win, config).run()
+
+    app = SimpleDigitalWallClock(win, config)
+    t = winTray(app)
+
+    def show_error(self, *args):
+        err = traceback.format_exception(*args)
+        tkMessageBox.showerror('Exception', err)
+        t.quit0()
+
+    tk.Tk.report_callback_exception = show_error
+    t.start()
+    app.run()
+    t.join()
 
 
 if __name__ == '__main__':
