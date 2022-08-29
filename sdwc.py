@@ -14,7 +14,7 @@ import tkinter.messagebox as tkMessageBox
 import pystray
 from PIL import Image
 
-CONFIGFILE = 'sdwc.in'
+CONFIGFILE = 'sdwc.ini'
 SSSCALE = 1.01
 
 config = {
@@ -412,10 +412,10 @@ def main():
 
     if not config['DEBUG']:
         win.withdraw()
-        # win.lower()
+        win.lower()
         win.wm_attributes('-transparentcolor', TP_COLOR)
         win.attributes('-topmost', config['TOPMOST'])
-        win.overrideredirect(config['OVERRIDEREDIRECT'])
+        win.after(0, lambda: win.overrideredirect(config['OVERRIDEREDIRECT']))
 
     app = SimpleDigitalWallClock(win, config)
     t = winTray(app)
