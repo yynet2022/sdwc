@@ -13,6 +13,9 @@ import tkinter.simpledialog as tkSimpleDialog
 import tkinter.messagebox as tkMessageBox
 import pystray
 from PIL import Image
+import locale
+
+locale.setlocale(locale.LC_ALL, '')
 
 CONFIGFILE = 'sdwc.ini'
 SSSCALE = 1.01
@@ -276,7 +279,8 @@ class SimpleDigitalWallClock(tk.Frame):
         self.config(bg=TP_COLOR, relief=tk.FLAT, bd=0)
 
         n = datetime.now()
-        ss = '{0:0>4d}/{1:0>2d}/{2:0>2d}'.format(n.year, n.month, n.day)
+        # ss = '{0:0>4d}/{1:0>2d}/{2:0>2d}'.format(n.year, n.month, n.day)
+        ss = n.strftime('%Y/%m/%d %a')
         fn = tkFont.Font(self.master, config['DATE_FONT'])
         wf = int(fn.measure(ss) * SSSCALE)
         hf = int(fn.metrics()['linespace'] * SSSCALE)
@@ -291,7 +295,8 @@ class SimpleDigitalWallClock(tk.Frame):
                       font=fn, tags='cdate', fill=config['FOREGROUND'])
         self.__cdate = c
 
-        ss = '{0:0>2d}:{1:0>2d}:{2:0>2d}'.format(n.hour, n.minute, n.second)
+        # ss = '{0:0>2d}:{1:0>2d}:{2:0>2d}'.format(n.hour, n.minute, n.second)
+        ss = n.strftime('%H:%M:%S')
         fn = tkFont.Font(self.master, config['TIME_FONT'])
         wf = int(fn.measure(ss) * SSSCALE)
         hf = int(fn.metrics()['linespace'] * SSSCALE)
@@ -369,9 +374,11 @@ class SimpleDigitalWallClock(tk.Frame):
 
     def __show_time(self):
         n = datetime.now()
-        s = '{0:0>4d}/{1:0>2d}/{2:0>2d}'.format(n.year, n.month, n.day)
+        # s = '{0:0>4d}/{1:0>2d}/{2:0>2d}'.format(n.year, n.month, n.day)
+        s = n.strftime('%Y/%m/%d %a')
         self.__cdate.itemconfig('cdate', text=s)
-        s = '{0:0>2d}:{1:0>2d}:{2:0>2d}'.format(n.hour, n.minute, n.second)
+        # s = '{0:0>2d}:{1:0>2d}:{2:0>2d}'.format(n.hour, n.minute, n.second)
+        s = n.strftime('%H:%M:%S')
         self.__ctime.itemconfig('ctime', text=s)
 
         t = time.time()
