@@ -374,6 +374,7 @@ class SimpleDigitalWallClock(tk.Frame):
 
     def __show_time(self):
         self.updateGeometry()
+        self.master.attributes('-topmost', config['TOPMOST'])
 
         n = datetime.now()
         # s = '{0:0>4d}/{1:0>2d}/{2:0>2d}'.format(n.year, n.month, n.day)
