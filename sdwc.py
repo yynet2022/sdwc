@@ -373,6 +373,8 @@ class SimpleDigitalWallClock(tk.Frame):
         wMenu(self)
 
     def __show_time(self):
+        self.updateGeometry()
+
         n = datetime.now()
         # s = '{0:0>4d}/{1:0>2d}/{2:0>2d}'.format(n.year, n.month, n.day)
         s = n.strftime('%Y/%m/%d %a')
