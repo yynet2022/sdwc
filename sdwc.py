@@ -18,7 +18,7 @@ import locale
 locale.setlocale(locale.LC_ALL, '')
 
 CONFIGFILE = 'sdwc.ini'
-SSSCALE = 1.01
+SSSCALE = 1.02
 
 config = {
     'DATE_FONT': ('Gothic', 24),
@@ -26,6 +26,8 @@ config = {
     'FOREGROUND': '#000000',
     'BACKGROUND': '#ffffff',
     'TRANSPARENTCOLOR': '#fff0f0',
+    'SHIFT_X': 0,
+    'SHIFT_Y': 0,
     'TOPMOST': True,
     'OVERRIDEREDIRECT': True,
     'DEBUG': False
@@ -44,7 +46,8 @@ def load_config():
     global config
     try:
         with open(CONFIGFILE, 'r') as fd:
-            config = json.load(fd)
+            c = json.load(fd)
+            config.update(c)
     except FileNotFoundError:
         pass
 
@@ -192,6 +195,24 @@ class wMenu(tkSimpleDialog.Dialog):
         b.grid(row=r, column=1, padx=5, pady=5)
 
         r += 1
+        lb = tk.Label(bfrm, text='Shift-X:')
+        lb.grid(row=r, column=0, sticky=tk.W)
+
+        self.__shift_x = tk.IntVar(value=config['SHIFT_X'])
+        self.__shift_x.trace_add('write', self.__numbered_x)
+        b = tk.Spinbox(bfrm, from_=0, to=100, textvariable = self.__shift_x)
+        b.grid(row=r, column=1, padx=5, pady=5)
+
+        r += 1
+        lb = tk.Label(bfrm, text='Shift-Y:')
+        lb.grid(row=r, column=0, sticky=tk.W)
+
+        self.__shift_y = tk.IntVar(value=config['SHIFT_Y'])
+        self.__shift_y.trace_add('write', self.__numbered_y)
+        b = tk.Spinbox(bfrm, from_=0, to=100, textvariable = self.__shift_y)
+        b.grid(row=r, column=1, padx=5, pady=5)
+
+        r += 1
         tk.Label(bfrm, text='Date:').grid(row=r, column=0, sticky=tk.W)
 
         b = tk.Button(bfrm, text='Font', width=w)
@@ -271,6 +292,20 @@ class wMenu(tkSimpleDialog.Dialog):
             config['TIME_FONT'] = f.result
             save_config()
 
+    def __numbered_x(self, *a):
+        try:
+            config['SHIFT_X'] = self.__shift_x.get()
+            save_config()
+        except Exception as e:
+            pass
+
+    def __numbered_y(self, *a):
+        try:
+            config['SHIFT_Y'] = self.__shift_y.get()
+            save_config()
+        except Exception as e:
+            pass
+
 
 class SimpleDigitalWallClock(tk.Frame):
     def __init__(self, root, config):
@@ -339,9 +374,11 @@ class SimpleDigitalWallClock(tk.Frame):
         ww = w0 + frmw * 2
         # hh = h0 + ttlh + frmw
         # m.geometry('{}x{}+{}+{}'.format(w0, h0, rw-ww, 0))
-        m.geometry('+{}+{}'.format(rw-ww, 0))
+        m.geometry('+{}+{}'.format(rw-ww+config['SHIFT_X'], config['SHIFT_Y']))
         if __DEBUG:
             print('geometry>', '+{}+{}'.format(rw-ww, 0))
+        m.update_idletasks()
+        # sys.stdout.flush()
 
     def getCanvasDate(self):
         return self.__cdate
